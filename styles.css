@@ -14,7 +14,6 @@ button.primary:hover { background: #5e73f6; }
 .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; display: grid; gap: 16px; }
 .card { background: #0f152b; border: 1px solid #1b2344; padding: 16px; border-radius: 16px; }
 .card h2, .card h3 { margin-top: 0; }
-.muted { opacity: 0.85; }
 
 .grid { display: grid; gap: 12px; }
 .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -23,7 +22,6 @@ button.primary:hover { background: #5e73f6; }
 label { display: block; font-size: 13px; opacity: 0.9; margin-bottom: 6px; }
 input, textarea, select { width: 100%; background: #0b1020; color: #e9ecf1; border: 1px solid #1b2344; padding: 8px 10px; border-radius: 10px; }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.chk { display: inline-flex; align-items: center; gap: 8px; margin-right: 12px; font-size: 13px; }
 
 .result, pre.result { background: #0b1020; border: 1px dashed #243062; border-radius: 10px; padding: 10px; margin-top: 10px; white-space: pre-wrap; }
 
