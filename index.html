@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MDUI Demo — Weekly Certification & Token</title>
+  <title>MDUI Demo — Weekly Certification (Simple)</title>
   <link rel="stylesheet" href="styles.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.min.js"></script>
+  <!-- UMD build exposes global `ethers` -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -50,7 +51,7 @@
 
       <div class="grid two">
         <div>
-          <label>Your MCC Balance</label>
+          <label>Your Token Balance</label>
           <input id="myMccBalance" disabled />
         </div>
         <div>
@@ -71,6 +72,7 @@
         <button class="tab" data-tab="token">Token Tools</button>
       </div>
 
+      <!-- ===================== CLAIMANT ===================== -->
       <div class="tab-content active" id="tab-claimant">
         <h3>Submit Weekly Certification</h3>
         <div class="grid two">
@@ -83,6 +85,7 @@
             <input id="earnUsd" type="number" step="0.01" placeholder="e.g., 123.45"/>
           </div>
         </div>
+
         <div class="grid two">
           <div>
             <label>Available For Work?</label>
@@ -93,33 +96,38 @@
             <select id="jobSearchCompliant"><option value="true">Yes</option><option value="false">No</option></select>
           </div>
         </div>
+
         <div class="grid two">
           <div>
             <label>Worked Full-Time?</label>
             <select id="workedFullTime"><option value="false">No</option><option value="true">Yes</option></select>
           </div>
           <div>
-            <label>Review Flags</label>
-            <div class="row">
-              <label class="chk"><input type="checkbox" id="flagSchool"/> Attended School (Q2=Yes)</label>
-              <label class="chk"><input type="checkbox" id="flagCommission"/> Commission This Week (Q5=Yes)</label>
-            </div>
+            <label>Refused Work?</label>
+            <select id="qRefusedWork"><option value="false">No</option><option value="true">Yes</option></select>
           </div>
         </div>
 
         <div class="grid two">
-          <div>
-            <label>Answers (7 items JSON; we will hash)</label>
-            <textarea id="answersJson" rows="4" placeholder='Example: ["Y","N","Y","N","N","N","Y"]'></textarea>
+          <div class="grid">
+            <label>Attended School/Training?</label>
+            <select id="qSchool"><option value="false">No</option><option value="true">Yes</option></select>
+
+            <label>Commission This Week?</label>
+            <select id="qCommission"><option value="false">No</option><option value="true">Yes</option></select>
+
+            <label>Received Severance/Vacation Pay?</label>
+            <select id="qSeverance"><option value="false">No</option><option value="true">Yes</option></select>
           </div>
-          <div>
-            <label>Account # (we will hash w/ salt + weekId into accountRef)</label>
-            <input id="accountNumber" placeholder="(never sent raw)" />
-            <div class="row">
-              <input id="accountSalt" placeholder="salt (random)"/>
-              <button id="btnRandSalt" type="button">Randomize Salt</button>
-            </div>
-            <small>We submit only <code>keccak256(account# + ":" + salt + ":" + weekId)</code> as <b>accountRef</b>.</small>
+          <div class="grid">
+            <label>Other Income (tips/gig/etc.)?</label>
+            <select id="qOtherIncome"><option value="false">No</option><option value="true">Yes</option></select>
+
+            <label>Attended Interviews/Assessments?</label>
+            <select id="qAssessments"><option value="false">No</option><option value="true">Yes</option></select>
+
+            <label>Any schedule/availability changes?</label>
+            <select id="qAvailabilityChange"><option value="false">No</option><option value="true">Yes</option></select>
           </div>
         </div>
 
@@ -147,19 +155,40 @@
         <pre class="result" id="certPreviewJson"></pre>
       </div>
 
+      <!-- ===================== PROCESSOR / ADMIN ===================== -->
       <div class="tab-content" id="tab-processor">
         <h3>Processor Actions</h3>
+
+        <!-- Lookup by Week ID (for processor) -->
         <div class="grid two">
           <div>
-            <label>certId</label>
+            <label>Week ID to Lookup</label>
+            <div class="row">
+              <input id="procLookupWeekId" type="number" placeholder="YYYYWW" />
+              <button id="btnProcLookupCertId">Get certId</button>
+            </div>
+          </div>
+          <div>
+            <label>Found certId</label>
+            <input id="procFoundCertId" disabled />
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div>
+            <label>certId (auto-filled from lookup)</label>
             <input id="procCertId" type="number" />
           </div>
           <div class="row">
-            <button id="btnApprove">Approve</button>
-            <button id="btnPay">Pay Approved</button>
-            <button id="btnApproveAndPay" class="primary">Approve & Pay</button>
+            <button id="btnApproveAndPay" class="primary">Approve &amp; Pay</button>
           </div>
         </div>
+
+        <div class="row">
+          <button id="btnProcPreviewCert">Preview Certification</button>
+        </div>
+        <pre class="result" id="procCertPreviewJson"></pre>
+
         <div class="grid">
           <div>
             <label>Reject Reason</label>
@@ -170,7 +199,8 @@
           </div>
         </div>
 
-        <h3>Owner Utilities</h3>
+        <!-- CHANGED: Owner Utilities -> Change Access (only Add/Remove Processor) -->
+        <h3>Change Access</h3>
         <div class="grid two">
           <div>
             <label>Add/Remove Processor</label>
@@ -180,6 +210,11 @@
               <button id="btnSetProcessor">Set</button>
             </div>
           </div>
+        </div>
+
+        <!-- NEW SECTION: Recovery (Burn & Reissue moved here) -->
+        <h3>Recovery</h3>
+        <div class="grid two">
           <div>
             <label>Burn & Reissue All (Recovery)</label>
             <div class="row">
@@ -190,7 +225,8 @@
           </div>
         </div>
 
-        <h3>Demo Policy Seed (Test-Only)</h3>
+        <!-- RENAMED: Demo Policy Seed -> Pre Weekly Certification - Claimant wise policy settings -->
+        <h3>Pre Weekly Certification - Claimant wise policy settings</h3>
         <div class="grid two">
           <div>
             <label>Set Base Weekly Benefit (WBA)</label>
@@ -222,9 +258,10 @@
         </div>
       </div>
 
+      <!-- ===================== TOKEN TOOLS ===================== -->
       <div class="tab-content" id="tab-token">
         <h3>Token Tools</h3>
-        <p>This uses the token address returned by <code>MDUI.token()</code>. For a separate demo ERC-20 (e.g., MarylandCrabCoin) you can paste that below to use its <code>mintForTesting</code>.</p>
+        <p>This uses the token address returned by <code>MDUI.token()</code>. For a separate ERC-20 you can paste it below to use its <code>mintForTesting</code>.</p>
         <div class="grid two">
           <div>
             <label>Separate ERC-20 (optional)</label>
@@ -241,10 +278,6 @@
         <pre class="result" id="tokenInfo"></pre>
       </div>
     </section>
-
-    <section class="card muted">
-      <p><b>Notes:</b> amounts are scaled to 6 decimals on the MDUI token (SCALE = 1e6). USD inputs are auto-scaled for you. The UI stores the contract address locally for convenience.</p>
-    </section>
   </main>
 
   <footer class="footer">Built for demo purposes.</footer>
@@ -252,3 +285,11 @@
   <script src="app.js"></script>
 </body>
 </html>
+       
+      
+        
+            
+           
+       
+          
+       
