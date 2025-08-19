@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MDUI Demo — Weekly Certification & Token</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>MDUI Demo</h1>
+    <div class="wallet-panel">
+      <button id="connectBtn">Connect Wallet</button>
+      <div class="wallet-info">
+        <span id="networkName">—</span>
+        <span id="accountAddr">—</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Configuration</h2>
+      <div class="grid two">
+        <div>
+          <label>MDUI Contract Address</label>
+          <input id="mduiAddress" placeholder="0x..." />
+        </div>
+        <div>
+          <label>Saved Addresses</label>
+          <div class="row">
+            <button id="saveConfig">Save</button>
+            <button id="loadConfig">Load</button>
+            <button id="clearConfig">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div>
+          <label>MDUI Owner</label>
+          <input id="mduiOwner" disabled />
+        </div>
+        <div>
+          <label>Token (auto from MDUI.token())</label>
+          <input id="tokenAddress" disabled />
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div>
+          <label>Your MCC Balance</label>
+          <input id="myMccBalance" disabled />
+        </div>
+        <div>
+          <label>Processor?</label>
+          <input id="amIProcessor" disabled />
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="btnInitRead">Fetch MDUI Info</button>
+      </div>
+    </section>
+
+    <section class="tabs card">
+      <div class="tab-header">
+        <button class="tab active" data-tab="claimant">Claimant</button>
+        <button class="tab" data-tab="processor">Processor/Admin</button>
+        <button class="tab" data-tab="token">Token Tools</button>
+      </div>
+
+      <div class="tab-content active" id="tab-claimant">
+        <h3>Submit Weekly Certification</h3>
+        <div class="grid two">
+          <div>
+            <label>Week ID (e.g., 202534)</label>
+            <input id="weekId" type="number" placeholder="YYYYWW" />
+          </div>
+          <div>
+            <label>Reported Earnings (USD)</label>
+            <input id="earnUsd" type="number" step="0.01" placeholder="e.g., 123.45"/>
+          </div>
+        </div>
+        <div class="grid two">
+          <div>
+            <label>Available For Work?</label>
+            <select id="availableForWork"><option value="true">Yes</option><option value="false">No</option></select>
+          </div>
+          <div>
+            <label>Job Search Compliant?</label>
+            <select id="jobSearchCompliant"><option value="true">Yes</option><option value="false">No</option></select>
+          </div>
+        </div>
+        <div class="grid two">
+          <div>
+            <label>Worked Full-Time?</label>
+            <select id="workedFullTime"><option value="false">No</option><option value="true">Yes</option></select>
+          </div>
+          <div>
+            <label>Review Flags</label>
+            <div class="row">
+              <label class="chk"><input type="checkbox" id="flagSchool"/> Attended School (Q2=Yes)</label>
+              <label class="chk"><input type="checkbox" id="flagCommission"/> Commission This Week (Q5=Yes)</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div>
+            <label>Answers (7 items JSON; we will hash)</label>
+            <textarea id="answersJson" rows="4" placeholder='Example: ["Y","N","Y","N","N","N","Y"]'></textarea>
+          </div>
+          <div>
+            <label>Account # (we will hash w/ salt + weekId into accountRef)</label>
+            <input id="accountNumber" placeholder="(never sent raw)" />
+            <div class="row">
+              <input id="accountSalt" placeholder="salt (random)"/>
+              <button id="btnRandSalt" type="button">Randomize Salt</button>
+            </div>
+            <small>We submit only <code>keccak256(account# + ":" + salt + ":" + weekId)</code> as <b>accountRef</b>.</small>
+          </div>
+        </div>
+
+        <div class="row">
+          <button id="btnPreviewPayout">Preview Payout</button>
+          <button id="btnSubmitCert" class="primary">Submit Certification</button>
+        </div>
+
+        <div class="result" id="previewResult"></div>
+
+        <h3>Lookup Certification</h3>
+        <div class="grid two">
+          <div>
+            <label>Week ID to Lookup</label>
+            <input id="lookupWeekId" type="number" placeholder="YYYYWW"/>
+          </div>
+          <div class="row">
+            <button id="btnLookupCertId">Get certId</button>
+            <input id="foundCertId" disabled />
+          </div>
+        </div>
+        <div class="row">
+          <button id="btnPreviewCert">Preview Certification (cert + computed + proc)</button>
+        </div>
+        <pre class="result" id="certPreviewJson"></pre>
+      </div>
+
+      <div class="tab-content" id="tab-processor">
+        <h3>Processor Actions</h3>
+        <div class="grid two">
+          <div>
+            <label>certId</label>
+            <input id="procCertId" type="number" />
+          </div>
+          <div class="row">
+            <button id="btnApprove">Approve</button>
+            <button id="btnPay">Pay Approved</button>
+            <button id="btnApproveAndPay" class="primary">Approve & Pay</button>
+          </div>
+        </div>
+        <div class="grid">
+          <div>
+            <label>Reject Reason</label>
+            <input id="rejectReason" placeholder="Explain why..." />
+          </div>
+          <div class="row">
+            <button id="btnReject">Reject</button>
+          </div>
+        </div>
+
+        <h3>Owner Utilities</h3>
+        <div class="grid two">
+          <div>
+            <label>Add/Remove Processor</label>
+            <div class="row">
+              <input id="newProcessor" placeholder="0xProcessor" />
+              <select id="newProcessorAllowed"><option value="true">Add</option><option value="false">Remove</option></select>
+              <button id="btnSetProcessor">Set</button>
+            </div>
+          </div>
+          <div>
+            <label>Burn & Reissue All (Recovery)</label>
+            <div class="row">
+              <input id="oldWallet" placeholder="0xOld" />
+              <input id="newWallet" placeholder="0xNew" />
+              <button id="btnBurnReissue">Burn & Reissue</button>
+            </div>
+          </div>
+        </div>
+
+        <h3>Demo Policy Seed (Test-Only)</h3>
+        <div class="grid two">
+          <div>
+            <label>Set Base Weekly Benefit (WBA)</label>
+            <div class="row">
+              <input id="wbaAddress" placeholder="0xClaimant" />
+              <input id="wbaUsd" type="number" step="0.01" placeholder="e.g., 250.00" />
+              <button id="btnSetWBA">Set WBA</button>
+            </div>
+          </div>
+          <div>
+            <label>Set Dependents</label>
+            <div class="row">
+              <input id="depAddress" placeholder="0xClaimant" />
+              <input id="depCount" type="number" min="0" max="5" placeholder="0–5" />
+              <button id="btnSetDeps">Set</button>
+            </div>
+          </div>
+        </div>
+        <div class="grid two">
+          <div>
+            <label>Set Policy (disregard, taperBps, maxWeeklyPayout)</label>
+            <div class="row">
+              <input id="disregardUsd" type="number" step="0.01" placeholder="$50.00" />
+              <input id="taperBps" type="number" placeholder="bps (ignored in MD mode)" />
+              <input id="maxWkUsd" type="number" step="0.01" placeholder="e.g., $430.00" />
+              <button id="btnSetPolicy">Set Policy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-token">
+        <h3>Token Tools</h3>
+        <p>This uses the token address returned by <code>MDUI.token()</code>. For a separate demo ERC-20 (e.g., MarylandCrabCoin) you can paste that below to use its <code>mintForTesting</code>.</p>
+        <div class="grid two">
+          <div>
+            <label>Separate ERC-20 (optional)</label>
+            <input id="extTokenAddr" placeholder="0x..." />
+          </div>
+          <div class="row">
+            <input id="mintAmount" type="number" step="0.000001" placeholder="Amount to mint" />
+            <button id="btnMintTest">mintForTesting(to=self)</button>
+          </div>
+        </div>
+        <div class="row">
+          <button id="refreshBalances">Refresh Balances</button>
+        </div>
+        <pre class="result" id="tokenInfo"></pre>
+      </div>
+    </section>
+
+    <section class="card muted">
+      <p><b>Notes:</b> amounts are scaled to 6 decimals on the MDUI token (SCALE = 1e6). USD inputs are auto-scaled for you. The UI stores the contract address locally for convenience.</p>
+    </section>
+  </main>
+
+  <footer class="footer">Built for demo purposes.</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
