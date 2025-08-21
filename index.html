@@ -223,17 +223,25 @@
             </div>
           </div>
         </div>
+
+        <!-- UPDATED: State-wide policy block (no taper) -->
+        <h3>State Wide Policy Settings</h3>
         <div class="grid two">
           <div>
-            <label>Set Policy (disregard, taperBps, maxWeeklyPayout)</label>
+            <label>Disregard amount (USD)</label>
             <div class="row">
               <input id="disregardUsd" type="number" step="0.01" placeholder="$50.00" />
-              <input id="taperBps" type="number" placeholder="bps (ignored in MD mode)" />
+            </div>
+          </div>
+          <div>
+            <label>Max Weekly Payout (USD)</label>
+            <div class="row">
               <input id="maxWkUsd" type="number" step="0.01" placeholder="e.g., $430.00" />
               <button id="btnSetPolicy">Set Policy</button>
             </div>
           </div>
         </div>
+        <!-- /UPDATED -->
       </div>
     </section>
   </main>
