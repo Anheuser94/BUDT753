@@ -24,6 +24,7 @@
   <main class="container">
     <section class="card">
       <h2>Configuration</h2>
+
       <div class="grid two">
         <div>
           <label>MDUI Contract Address</label>
@@ -43,10 +44,6 @@
         <div>
           <label>MDUI Owner</label>
           <input id="mduiOwner" disabled />
-        </div>
-        <div>
-          <label>Token (auto from MDUI.token())</label>
-          <input id="tokenAddress" disabled />
         </div>
       </div>
 
@@ -157,27 +154,57 @@
 
       <!-- ===================== PROCESSOR / ADMIN ===================== -->
       <div class="tab-content" id="tab-processor">
-        <!-- Umbrella 1 -->
-        <h2 class="umbrella">Pre Weekly Certification Configurations</h2>
+        <h3>Processor Actions</h3>
 
-        <!-- Public wise policy settings -->
-        <h3>Public wise policy settings</h3>
+        <!-- certId only -->
         <div class="grid two">
           <div>
-            <label>Disregard Amount (USD)</label>
-            <input id="disregardUsd" type="number" step="0.01" placeholder="$50.00" />
+            <label>certId</label>
+            <input id="procCertId" type="number" placeholder="Enter certId" />
           </div>
-          <div>
-            <label>Max Weekly Payout (USD)</label>
-            <input id="maxWkUsd" type="number" step="0.01" placeholder="e.g., $430.00" />
+          <div class="row">
+            <button id="btnProcPreviewCert">Preview Certification</button>
+            <button id="btnApproveAndPay" class="primary">Approve &amp; Pay</button>
           </div>
-        </div>
-        <div class="row">
-          <button id="btnSetPolicy">Set Policy</button>
         </div>
 
-        <!-- Claimant wise policy settings -->
-        <h3>Claimant wise policy settings</h3>
+        <pre class="result" id="procCertPreviewJson"></pre>
+
+        <div class="grid">
+          <div>
+            <label>Reject Reason</label>
+            <input id="rejectReason" placeholder="Explain why..." />
+          </div>
+          <div class="row">
+            <button id="btnReject">Reject</button>
+          </div>
+        </div>
+
+        <h3>Change Access</h3>
+        <div class="grid two">
+          <div>
+            <label>Add/Remove Processor</label>
+            <div class="row">
+              <input id="newProcessor" placeholder="0xProcessor" />
+              <select id="newProcessorAllowed"><option value="true">Add</option><option value="false">Remove</option></select>
+              <button id="btnSetProcessor">Set</button>
+            </div>
+          </div>
+        </div>
+
+        <h3>Recovery</h3>
+        <div class="grid two">
+          <div>
+            <label>Burn & Reissue All (Recovery)</label>
+            <div class="row">
+              <input id="oldWallet" placeholder="0xOld" />
+              <input id="newWallet" placeholder="0xNew" />
+              <button id="btnBurnReissue">Burn & Reissue</button>
+            </div>
+          </div>
+        </div>
+
+        <h3>Pre Weekly Certification - Claimant wise policy settings</h3>
         <div class="grid two">
           <div>
             <label>Set Base Weekly Benefit (WBA)</label>
@@ -196,60 +223,14 @@
             </div>
           </div>
         </div>
-
-        <!-- Umbrella 2 -->
-        <h2 class="umbrella">Weekly Certification Approval Actions</h2>
-
-        <!-- Processor Actions -->
-        <h3>Processor Actions</h3>
         <div class="grid two">
           <div>
-            <label>certId to review</label>
+            <label>Set Policy (disregard, taperBps, maxWeeklyPayout)</label>
             <div class="row">
-              <input id="procCertId" type="number" placeholder="e.g., 12" />
-              <button id="btnProcPreviewCert">Preview Certification</button>
-            </div>
-          </div>
-          <div class="row">
-            <button id="btnApproveAndPay" class="primary">Approve &amp; Pay</button>
-          </div>
-        </div>
-        <pre class="result" id="procCertPreviewJson"></pre>
-        <div class="grid">
-          <div>
-            <label>Reject Reason</label>
-            <input id="rejectReason" placeholder="Explain why..." />
-          </div>
-          <div class="row">
-            <button id="btnReject">Reject</button>
-          </div>
-        </div>
-
-        <!-- Umbrella 3 -->
-        <h2 class="umbrella">Admin/Access Actions</h2>
-
-        <!-- Change Access -->
-        <h3>Change Access</h3>
-        <div class="grid two">
-          <div>
-            <label>Add/Remove Processor</label>
-            <div class="row">
-              <input id="newProcessor" placeholder="0xProcessor" />
-              <select id="newProcessorAllowed"><option value="true">Add</option><option value="false">Remove</option></select>
-              <button id="btnSetProcessor">Set</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recovery -->
-        <h3>Recovery</h3>
-        <div class="grid two">
-          <div>
-            <label>Burn & Reissue All (Recovery)</label>
-            <div class="row">
-              <input id="oldWallet" placeholder="0xOld" />
-              <input id="newWallet" placeholder="0xNew" />
-              <button id="btnBurnReissue">Burn & Reissue</button>
+              <input id="disregardUsd" type="number" step="0.01" placeholder="$50.00" />
+              <input id="taperBps" type="number" placeholder="bps (ignored in MD mode)" />
+              <input id="maxWkUsd" type="number" step="0.01" placeholder="e.g., $430.00" />
+              <button id="btnSetPolicy">Set Policy</button>
             </div>
           </div>
         </div>
